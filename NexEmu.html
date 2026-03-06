@@ -484,7 +484,7 @@
                 <span class="logo-dot" aria-hidden="true"></span>
                 <div>
                     <h1>NexEmu</h1>
-                    <p>A modern, high-performance retro gaming emulator.</p>
+                    <p id="brandSubtitle">A modern, high-performance retro gaming emulator.</p>
                 </div>
             </div>
             <div class="topbar-actions">
@@ -502,7 +502,7 @@
                     <option value="rose">Rose</option>
                     <option value="opiumcore">Opiumcore ✶</option>
                 </select>
-                <button id="shortcutsBtn" class="ghost">✦ Shortcuts</button>
+                <button id="shortcutsBtn" class="ghost">✧ Shortcuts</button>
             </div>
         </header>
 
@@ -565,7 +565,7 @@
             <main class="panel main">
                 <section id="welcomeSection">
                     <h2>Load Your ROM</h2>
-                    <p class="muted">Drag and drop a ROM, or browse files to upload it. The core is detected automatically; if the core isn’t detected, you can select it manually.</p>
+                    <p id="welcomeLead" class="muted">Drag and drop a ROM, or browse files to upload it. The core is detected automatically; if the core isn’t detected, you can select it manually.</p>
 
 
 
@@ -695,6 +695,17 @@
         const densityPicker = document.getElementById('densityPicker');
         const customizationPanel = document.getElementById('customizationPanel');
         const themePicker = document.getElementById('themePicker');
+        const shortcutsBtn = document.getElementById('shortcutsBtn');
+        const clearRecentBtn = document.getElementById('clearRecent');
+        const toggleFullscreenBtn = document.getElementById('toggleFullscreen');
+        const resetPrefsBtn = document.getElementById('resetPrefs');
+        const newGameBtn = document.getElementById('newGame');
+        const shortcutsTitle = document.querySelector('#shortcutsDialog h3');
+        const closeShortcutsBtn = document.getElementById('closeShortcuts');
+        const uploadHeading = document.querySelector('#uploadZone h3');
+        const customizationSummary = document.querySelector('#customizationPanel summary');
+        const brandSubtitle = document.getElementById('brandSubtitle');
+        const welcomeLead = document.getElementById('welcomeLead');
         const OPIUMCORE_PASSWORD = '<3^3';
         let opiumcoreAuthenticated = localStorage.getItem('nexemu_opiumcore_auth') === 'true';
 
@@ -727,6 +738,24 @@
         function syncOpiumcoreState() {
             const isOpiumTheme = document.documentElement.getAttribute('data-theme') === 'opiumcore';
             document.body.classList.toggle('opiumcore-mode', isOpiumTheme);
+            applyOpiumcoreText(isOpiumTheme);
+        }
+
+
+
+
+        function applyOpiumcoreText(isOpiumTheme) {
+            shortcutsBtn.textContent = isOpiumTheme ? '✧ Sigils' : '✧ Shortcuts';
+            clearRecentBtn.textContent = isOpiumTheme ? '✧ Clear Echoes' : '✧ Clear Recent ROMs';
+            toggleFullscreenBtn.textContent = isOpiumTheme ? '◈ Voidscreen' : '◈ Toggle Fullscreen';
+            resetPrefsBtn.textContent = isOpiumTheme ? '☾ Purge Settings' : '☾ Reset Settings';
+            newGameBtn.textContent = isOpiumTheme ? '✶ Load New Relic' : '✶ Load New ROM';
+            shortcutsTitle.textContent = isOpiumTheme ? 'Keyboard Sigils' : 'Keyboard Shortcuts';
+            closeShortcutsBtn.textContent = isOpiumTheme ? 'Seal' : 'Close';
+            uploadHeading.textContent = isOpiumTheme ? 'Drop ROM Relics Here' : 'Drop ROM Files Here';
+            customizationSummary.textContent = isOpiumTheme ? 'Interface Rituals' : 'Customization Settings';
+            brandSubtitle.textContent = isOpiumTheme ? 'A shadow-tuned retro ritual interface.' : 'A modern, high-performance retro gaming emulator.';
+            welcomeLead.textContent = isOpiumTheme ? 'Drop a relic and awaken a core. Detection still runs automatically, but you can command the core manually.' : 'Drag and drop a ROM, or browse files to upload it. The core is detected automatically; if the core isn’t detected, you can select it manually.';
         }
 
 
