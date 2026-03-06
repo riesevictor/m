@@ -118,6 +118,25 @@
 
 
 
+        html[data-theme="opiumcore"] {
+            --bg-main: #0f0a18;
+            --bg-secondary: #181129;
+            --card-bg: rgba(27, 21, 40, 0.84);
+            --card-border: rgba(175, 128, 255, 0.34);
+            --text-main: #f4edff;
+            --text-muted: #b8a7d6;
+            --accent: #b97bff;
+            --accent-strong: #7b3bcb;
+            --accent-soft: rgba(185, 123, 255, 0.2);
+            --button-radius: 2px;
+            --ui-radius: 6px;
+            --ui-font: 'Courier New', 'Consolas', monospace;
+            --app-width: 1480;
+        }
+
+
+
+
         @keyframes floatIn {
             from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
@@ -445,6 +464,13 @@
 
 
 
+        body.opiumcore-mode .grid { grid-template-columns: 280px 1fr; }
+        body.opiumcore-mode .topbar, body.opiumcore-mode .panel { box-shadow: 0 0 0 1px rgba(185, 123, 255, 0.24), 0 16px 35px rgba(0, 0, 0, 0.45); }
+        body.opiumcore-mode button { text-transform: uppercase; letter-spacing: 0.08em; }
+
+
+
+
         @media (max-width: 1000px) {
             .grid { grid-template-columns: 1fr; }
             #game { height: 430px; }
@@ -474,8 +500,9 @@
                     <option value="teal">Teal</option>
                     <option value="indigo">Indigo</option>
                     <option value="rose">Rose</option>
+                    <option value="opiumcore">Opiumcore ✶</option>
                 </select>
-                <button id="shortcutsBtn" class="ghost">⌨️ Shortcuts</button>
+                <button id="shortcutsBtn" class="ghost">✦ Shortcuts</button>
             </div>
         </header>
 
@@ -502,7 +529,7 @@
                     <p class="muted">Keep track of your 5 most recent ROMs.</p>
                     <div id="recentList" class="space muted">No ROMs loaded yet.</div>
                     <div class="row space">
-                        <button id="clearRecent" class="ghost">🗑️ Clear Recent ROMs</button>
+                        <button id="clearRecent" class="ghost">✧ Clear Recent ROMs</button>
                     </div>
                 </section>
 
@@ -512,10 +539,15 @@
                 <section class="card">
                     <h3>Quick Tools</h3>
                     <div class="row space">
-                        <button id="toggleFullscreen" class="ghost">🖥️ Toggle Fullscreen</button>
-                        <button id="resetPrefs" class="ghost">🔄 Reset Settings</button>
+                        <button id="toggleFullscreen" class="ghost">◈ Toggle Fullscreen</button>
+                        <button id="resetPrefs" class="ghost">☾ Reset Settings</button>
                     </div>
                 </section>
+
+
+
+
+
 
 
 
@@ -539,7 +571,7 @@
 
 
                     <div class="upload-zone" id="uploadZone">
-                        <div style="font-size: 2.8rem;">📁</div>
+                        <div style="font-size: 2.8rem;">⬢</div>
                         <h3 style="margin-top: 8px;">Drop ROM Files Here</h3>
                         <p class="muted space">or</p>
                         <input type="file" id="input" hidden>
@@ -606,7 +638,7 @@
                             <h2 id="gameTitle">Now Playing</h2>
                             <p id="gameInfo" class="muted">Session details</p>
                         </div>
-                        <button id="newGame">🔃 Load New ROM</button>
+                        <button id="newGame">✶ Load New ROM</button>
                     </div>
                     <div id="game"></div>
                 </section>
@@ -662,6 +694,9 @@
         const layoutWidthValue = document.getElementById('layoutWidthValue');
         const densityPicker = document.getElementById('densityPicker');
         const customizationPanel = document.getElementById('customizationPanel');
+        const themePicker = document.getElementById('themePicker');
+        const OPIUMCORE_PASSWORD = '<3^3';
+        let opiumcoreAuthenticated = localStorage.getItem('nexemu_opiumcore_auth') === 'true';
 
 
 
@@ -681,8 +716,63 @@
 
         function setTheme(themeName) {
             document.documentElement.setAttribute('data-theme', themeName);
-            document.getElementById('themePicker').value = themeName;
+            themePicker.value = themeName;
             localStorage.setItem('nexemu_theme', themeName);
+            syncOpiumcoreState();
+        }
+
+
+
+
+        function syncOpiumcoreState() {
+            const isOpiumTheme = document.documentElement.getAttribute('data-theme') === 'opiumcore';
+            document.body.classList.toggle('opiumcore-mode', isOpiumTheme);
+        }
+
+
+
+
+        function applyOpiumcoreCustomization() {
+            document.documentElement.style.setProperty('--button-radius', '2px');
+            document.documentElement.style.setProperty('--ui-radius', '6px');
+            document.documentElement.style.setProperty('--ui-font', "'Courier New', 'Consolas', monospace");
+            document.documentElement.style.setProperty('--app-width', '1480');
+            document.documentElement.style.setProperty('--ui-scale', '102');
+            document.body.classList.remove('density-comfortable', 'density-compact', 'density-condensed');
+            document.body.classList.add('density-condensed');
+
+            cornerRadiusSlider.value = '6';
+            cornerRadiusValue.textContent = '6px';
+            buttonShapePicker.value = '0';
+            fontPicker.value = "'Courier New', Courier, monospace";
+            uiScaleSlider.value = '102';
+            uiScaleValue.textContent = '102%';
+            layoutWidthSlider.value = '1480';
+            layoutWidthValue.textContent = '1480px';
+            densityPicker.value = 'condensed';
+            [cornerRadiusSlider, uiScaleSlider, layoutWidthSlider].forEach(updateRangeVisual);
+        }
+
+
+
+
+        function isOpiumcoreTheme() {
+            return document.documentElement.getAttribute('data-theme') === 'opiumcore';
+        }
+
+
+
+
+        async function requestOpiumcoreUnlock() {
+            if (opiumcoreAuthenticated) return true;
+            const inputPassword = window.prompt('Opiumcore is locked. Enter password to unlock this theme:');
+            if (inputPassword === OPIUMCORE_PASSWORD) {
+                opiumcoreAuthenticated = true;
+                localStorage.setItem('nexemu_opiumcore_auth', 'true');
+                return true;
+            }
+            alert('Wrong password. Opiumcore remains locked.');
+            return false;
         }
 
 
@@ -789,6 +879,7 @@
             [cornerRadiusSlider, uiScaleSlider, layoutWidthSlider].forEach(updateRangeVisual);
             densityPicker.value = density;
             if (settingsOpen !== null) customizationPanel.open = settingsOpen === 'true';
+            if (isOpiumcoreTheme()) applyOpiumcoreCustomization();
         }
 
 
@@ -954,8 +1045,18 @@
 
 
 
-        document.getElementById('themePicker').addEventListener('change', (e) => {
+        themePicker.addEventListener('change', async (e) => {
+            if (e.target.value === 'opiumcore') {
+                const unlocked = await requestOpiumcoreUnlock();
+                if (!unlocked) {
+                    const fallback = localStorage.getItem('nexemu_theme') || 'coral';
+                    themePicker.value = fallback === 'opiumcore' ? 'coral' : fallback;
+                    return;
+                }
+            }
             setTheme(e.target.value);
+            if (e.target.value === 'opiumcore') applyOpiumcoreCustomization();
+            else applyCustomizationSettings();
         });
 
 
@@ -978,8 +1079,9 @@
 
 
         document.getElementById('resetPrefs').addEventListener('click', () => {
-            ['nexemu_corner_radius', 'nexemu_button_shape', 'nexemu_font', 'nexemu_ui_scale', 'nexemu_layout_width', 'nexemu_density', 'nexemu_compact_mode', 'nexemu_settings_open', 'nexemu_theme']
+            ['nexemu_corner_radius', 'nexemu_button_shape', 'nexemu_font', 'nexemu_ui_scale', 'nexemu_layout_width', 'nexemu_density', 'nexemu_compact_mode', 'nexemu_settings_open', 'nexemu_theme', 'nexemu_opiumcore_auth']
                 .forEach(key => localStorage.removeItem(key));
+            opiumcoreAuthenticated = false;
             setTheme('coral');
             applyCustomizationSettings();
         });
@@ -993,6 +1095,7 @@
 
 
         cornerRadiusSlider.addEventListener('input', (e) => {
+            if (isOpiumcoreTheme()) { applyOpiumcoreCustomization(); return; }
             const radius = Number(e.target.value);
             document.documentElement.style.setProperty('--ui-radius', `${radius}px`);
             cornerRadiusValue.textContent = `${radius}px`;
@@ -1004,6 +1107,7 @@
 
 
         buttonShapePicker.addEventListener('change', (e) => {
+            if (isOpiumcoreTheme()) { applyOpiumcoreCustomization(); return; }
             document.documentElement.style.setProperty('--button-radius', `${e.target.value}px`);
             localStorage.setItem('nexemu_button_shape', e.target.value);
         });
@@ -1012,6 +1116,7 @@
 
 
         fontPicker.addEventListener('change', (e) => {
+            if (isOpiumcoreTheme()) { applyOpiumcoreCustomization(); return; }
             document.documentElement.style.setProperty('--ui-font', e.target.value);
             localStorage.setItem('nexemu_font', e.target.value);
         });
@@ -1020,6 +1125,7 @@
 
 
         uiScaleSlider.addEventListener('input', (e) => {
+            if (isOpiumcoreTheme()) { applyOpiumcoreCustomization(); return; }
             const scale = Number(e.target.value);
             document.documentElement.style.setProperty('--ui-scale', String(scale));
             uiScaleValue.textContent = `${scale}%`;
@@ -1031,6 +1137,7 @@
 
 
         layoutWidthSlider.addEventListener('input', (e) => {
+            if (isOpiumcoreTheme()) { applyOpiumcoreCustomization(); return; }
             const width = Number(e.target.value);
             document.documentElement.style.setProperty('--app-width', String(width));
             layoutWidthValue.textContent = `${width}px`;
@@ -1042,6 +1149,7 @@
 
 
         densityPicker.addEventListener('change', (e) => {
+            if (isOpiumcoreTheme()) { applyOpiumcoreCustomization(); return; }
             const density = e.target.value;
             document.body.classList.remove('density-comfortable', 'density-compact', 'density-condensed');
             document.body.classList.add(`density-${density}`);
@@ -1061,10 +1169,6 @@
         const shortcutsDialog = document.getElementById('shortcutsDialog');
         document.getElementById('shortcutsBtn').addEventListener('click', () => shortcutsDialog.showModal());
         document.getElementById('closeShortcuts').addEventListener('click', () => shortcutsDialog.close());
-
-
-
-
         document.addEventListener('keydown', (e) => {
             if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Spacebar'].includes(e.key)) {
                 e.preventDefault();
@@ -1151,8 +1255,10 @@
         })();
 
         const savedTheme = localStorage.getItem('nexemu_theme') || 'coral';
-        setTheme(savedTheme);
+        const safeTheme = savedTheme === 'opiumcore' && !opiumcoreAuthenticated ? 'coral' : savedTheme;
+        setTheme(safeTheme);
         applyCustomizationSettings();
+        if (safeTheme === 'opiumcore') applyOpiumcoreCustomization();
         renderRecentRoms();
     </script>
 </body>
